@@ -73,7 +73,7 @@ export default {
 			const currentDate = new Date();
 			currentDate.setHours(0, 0, 0, 0); 
 			const timestamp = Math.ceil(currentDate.getTime() / 1000);
-			const fakeUserIDMD5 = await 双重哈希(`${userID}${timestamp}`);
+			const fakeUserIDMD5 = await hashMD5(`${userID}${timestamp}`);
 			fakeUserID = [
 				fakeUserIDMD5.slice(0, 8),
 				fakeUserIDMD5.slice(8, 12),
@@ -85,16 +85,16 @@ export default {
 			fakeHostName = `${fakeUserIDMD5.slice(6, 9)}.${fakeUserIDMD5.slice(13, 19)}`;
 
 			proxyIP = env.PROXYIP || env.proxyip || proxyIP;
-			proxyIPs = await 整理(proxyIP);
+			proxyIPs = await str2Array(proxyIP);
 			proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 
 			socks5Address = env.SOCKS5 || socks5Address;
-			socks5s = await 整理(socks5Address);
+			socks5s = await str2Array(socks5Address);
 			socks5Address = socks5s[Math.floor(Math.random() * socks5s.length)];
 			socks5Address = socks5Address.split('//')[1] || socks5Address;
-			if (env.GO2SOCKS5) go2Socks5s = await 整理(env.GO2SOCKS5);
-			if (env.CFPORTS) httpsPorts = await 整理(env.CFPORTS);
-			if (env.BAN) banHosts = await 整理(env.BAN);
+			if (env.GO2SOCKS5) go2Socks5s = await str2Array(env.GO2SOCKS5);
+			if (env.CFPORTS) httpsPorts = await str2Array(env.CFPORTS);
+			if (env.BAN) banHosts = await str2Array(env.BAN);
 			if (socks5Address) {
 				try {
 					parsedSocks5Address = socks5AddressParser(socks5Address);
@@ -113,11 +113,11 @@ export default {
 			const upgradeHeader = request.headers.get('Upgrade');
 			const url = new URL(request.url);
 			if (!upgradeHeader || upgradeHeader !== 'websocket') {
-				if (env.ADD) addresses = await 整理(env.ADD);
-				if (env.ADDAPI) addressesapi = await 整理(env.ADDAPI);
-				if (env.ADDNOTLS) addressesnotls = await 整理(env.ADDNOTLS);
-				if (env.ADDNOTLSAPI) addressesnotlsapi = await 整理(env.ADDNOTLSAPI);
-				if (env.ADDCSV) addressescsv = await 整理(env.ADDCSV);
+				if (env.ADD) addresses = await str2Array(env.ADD);
+				if (env.ADDAPI) addressesapi = await str2Array(env.ADDAPI);
+				if (env.ADDNOTLS) addressesnotls = await str2Array(env.ADDNOTLS);
+				if (env.ADDNOTLSAPI) addressesnotlsapi = await str2Array(env.ADDNOTLSAPI);
+				if (env.ADDCSV) addressescsv = await str2Array(env.ADDCSV);
 				DLS = Number(env.DLS) || DLS;
 				remarkIndex = Number(env.CSVREMARK) || remarkIndex;
 				BotToken = env.TGTOKEN || BotToken;
@@ -125,7 +125,7 @@ export default {
 				FileName = env.SUBNAME || FileName;
 				subEmoji = env.SUBEMOJI || env.EMOJI || subEmoji;
 				if (subEmoji == '0') subEmoji = 'false';
-				if (env.LINK) link = await 整理(env.LINK) ;
+				if (env.LINK) link = await str2Array(env.LINK) ;
 				sub = env.SUB || sub;
 				subConverter = env.SUBAPI || subConverter;
 				if (subConverter.includes("http://") ){
@@ -1124,25 +1124,25 @@ function 恢复伪装信息(content, userID, hostName, isBase64) {
  * 这个函数对输入文本进行两次MD5哈希，增强安全性
  * 第二次哈希使用第一次哈希结果的一部分作为输入
  * 
- * @param {string} 文本 要哈希的文本
+ * @param {string} enter_text 要哈希的文本
  * @returns {Promise<string>} 双重哈希后的小写十六进制字符串
  */
-async function 双重哈希(文本) {
-	const 编码器 = new TextEncoder();
+async function hashMD5(enter_text) {
+	const text_encoder = new TextEncoder();
 
-	const 第一次哈希 = await crypto.subtle.digest('MD5', 编码器.encode(文本));
-	const 第一次哈希数组 = Array.from(new Uint8Array(第一次哈希));
-	const 第一次十六进制 = 第一次哈希数组.map(字节 => 字节.toString(16).padStart(2, '0')).join('');
+	const digest1 = await crypto.subtle.digest('MD5', text_encoder.encode(enter_text));
+	const array_digist1 = Array.from(new Uint8Array(digest1));
+	const hex_array_digist1 = array_digist1.map((byte) => byte.toString(16).padStart(2, '0')).join('');
 
-	const 第二次哈希 = await crypto.subtle.digest('MD5', 编码器.encode(第一次十六进制.slice(7, 27)));
-	const 第二次哈希数组 = Array.from(new Uint8Array(第二次哈希));
-	const 第二次十六进制 = 第二次哈希数组.map(字节 => 字节.toString(16).padStart(2, '0')).join('');
+	const digest2 = await crypto.subtle.digest('MD5', text_encoder.encode(hex_array_digist1.slice(7, 27)));
+	const array_digist2 = Array.from(new Uint8Array(digest2));
+	const hex_array_digist2 = array_digist2.map((byte) => byte.toString(16).padStart(2, '0')).join('');
   
-	return 第二次十六进制.toLowerCase();
+	return hex_array_digist2.toLowerCase();
 }
 
 async function 代理URL(代理网址, 目标网址) {
-	const 网址列表 = await 整理(代理网址);
+	const 网址列表 = await str2Array(代理网址);
 	const 完整网址 = 网址列表[Math.floor(Math.random() * 网址列表.length)];
 
 	// 解析目标 URL
@@ -1181,9 +1181,9 @@ async function 代理URL(代理网址, 目标网址) {
 	return 新响应;
 }
 
-const 啥啥啥_写的这是啥啊 = atob('ZG14bGMzTT0=');
+const decode_str1 = atob('ZG14bGMzTT0=');
 function 配置信息(UUID, 域名地址) {
-	const 协议类型 = atob(啥啥啥_写的这是啥啊);
+	const 协议类型 = atob(decode_str1);
 	
 	const 别名 = FileName;
 	let 地址 = 域名地址;
@@ -1226,14 +1226,14 @@ async function 生成配置信息(userID, hostName, sub, UA, RproxyIP, _url, env
 		if (match) {
 			sub = match[1];
 		}
-		const subs = await 整理(sub);
+		const subs = await str2Array(sub);
 		if (subs.length > 1) sub = subs[0];
 	} else {
 		if (env.KV){
 			await 迁移地址列表(env);
 			const 优选地址列表 = await env.KV.get('ADD.txt');
 			if (优选地址列表) {
-				const 优选地址数组 = await 整理(优选地址列表);
+				const 优选地址数组 = await str2Array(优选地址列表);
 				const 分类地址 = {
 					接口地址: new Set(),
 					链接地址: new Set(),
@@ -1595,7 +1595,7 @@ async function 整理优选列表(api) {
 					// 验证当前apiUrl是否带有'proxyip=true'
 					if (api[index].includes('proxyip=true')) {
 						// 如果URL带有'proxyip=true'，则将内容添加到proxyIPPool
-						proxyIPPool = proxyIPPool.concat((await 整理(content)).map(item => {
+						proxyIPPool = proxyIPPool.concat((await str2Array(content)).map(item => {
 							const baseItem = item.split('#')[0] || item;
 							if (baseItem.includes(':')) {
 								const port = baseItem.split(':')[1];
@@ -1620,7 +1620,7 @@ async function 整理优选列表(api) {
 		clearTimeout(timeout);
 	}
 
-	const newAddressesapi = await 整理(newapi);
+	const newAddressesapi = await str2Array(newapi);
 
 	// 返回处理后的结果
 	return newAddressesapi;
@@ -1745,7 +1745,7 @@ function 生成本地订阅(host,UUID,noTLS,newAddressesapi,newAddressescsv,newA
 			let 伪装域名 = host ;
 			let 最终路径 = path ;
 			let 节点备注 = '';
-			const 协议类型 = atob(啥啥啥_写的这是啥啊);
+			const 协议类型 = atob(decode_str1);
 			
 			const 维列斯Link = `${协议类型}://${UUID}@${address}:${port + atob('P2VuY3J5cHRpb249bm9uZSZzZWN1cml0eT0mdHlwZT13cyZob3N0PQ==') + 伪装域名}&path=${encodeURIComponent(最终路径)}#${encodeURIComponent(addressid + 节点备注)}`;
 	
@@ -1811,7 +1811,7 @@ function 生成本地订阅(host,UUID,noTLS,newAddressesapi,newAddressescsv,newA
 			节点备注 = ` 已启用临时域名中转服务，请尽快绑定自定义域！`;
 		}
 		
-		const 协议类型 = atob(啥啥啥_写的这是啥啊);
+		const 协议类型 = atob(decode_str1);
 		const 维列斯Link = `${协议类型}://${UUID}@${address}:${port + atob('P2VuY3J5cHRpb249bm9uZSZzZWN1cml0eT10bHMmc25pPQ==') + 伪装域名}&fp=random&type=ws&host=${伪装域名}&path=${encodeURIComponent(最终路径)}#${encodeURIComponent(addressid + 节点备注)}`;
 			
 		return 维列斯Link;
@@ -1823,19 +1823,19 @@ function 生成本地订阅(host,UUID,noTLS,newAddressesapi,newAddressescsv,newA
 	return btoa(base64Response);
 }
 
-async function 整理(内容) {
+async function str2Array(enter_str) {
 	// 将制表符、双引号、单引号和换行符都替换为逗号
 	// 然后将连续的多个逗号替换为单个逗号
-	var 替换后的内容 = 内容.replace(/[	|"'\r\n]+/g, ',').replace(/,+/g, ',');
+	var new_str1 = enter_str.replace(/[	|"'\r\n]+/g, ',').replace(/,+/g, ',');
 	
 	// 删除开头和结尾的逗号（如果有的话）
-	if (替换后的内容.charAt(0) == ',') 替换后的内容 = 替换后的内容.slice(1);
-	if (替换后的内容.charAt(替换后的内容.length - 1) == ',') 替换后的内容 = 替换后的内容.slice(0, 替换后的内容.length - 1);
+	if (new_str1.charAt(0) == ',') new_str1 = new_str1.slice(1);
+	if (new_str1.charAt(new_str1.length - 1) == ',') new_str1 = new_str1.slice(0, new_str1.length - 1);
 	
 	// 使用逗号分割字符串，得到地址数组
-	const 地址数组 = 替换后的内容.split(',');
+	const new_array = new_str1.split(',');
 	
-	return 地址数组;
+	return new_array;
 }
 
 async function sendMessage(type, ip, add_data = "") {
